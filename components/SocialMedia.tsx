@@ -32,7 +32,7 @@ const socialLink = [
     icon: <Twitter className="w-5 h-5" />,
   },
 ];
-function SocialMedia({ className, iconClassName, tooltipClassName }: Props) {
+function SocialMedia({  iconClassName, tooltipClassName }: Props) {
   return (
     <TooltipProvider>
       <div className={cn("flex items-center gap-3.5")}>

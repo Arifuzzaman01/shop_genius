@@ -1,13 +1,20 @@
-import HomeBanner from '@/components/home/HomeBanner'
-import TestComponent from '@/components/TestComponent'
 import React from 'react'
+import HomeBanner from '@/components/home/HomeBanner'
+import Container from '@/components/Container'
+import ProductGrid from '@/components/products/ProductGrid'
 
 const MainPage = () => {
   return (
-    <div className='text-primary bg-shop_bg'>
+    <Container>
       <HomeBanner />
-      <TestComponent />
-    </div>
+      <div className="py-10">
+        <ProductGrid />
+        {/* 
+        <HomeCategories categories={categories} />
+        <ShopByBrand />
+        <LatestBlog /> */}
+      </div>
+    </Container>
   )
 }
 
