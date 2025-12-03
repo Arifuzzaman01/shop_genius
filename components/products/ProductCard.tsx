@@ -7,6 +7,7 @@ import { SubTitle } from "../ui/text";
 // import PriceView from "./price/PriceView";
 import AddToCartButton from "./addToCard/AddToCartButton";
 import PriceView from "./price/PriceView";
+import { Product } from "@/app/constants/schema";
 // import AddToCartButton from "";
 
 const ProductCard = ({ product }: { product: Product }) => {
@@ -15,10 +16,10 @@ const ProductCard = ({ product }: { product: Product }) => {
     <div className="text-sm border-[1px] border-dark_blue/20 rounded-md overflow-hidden bg-white group">
       <div className="relative group overflow-hidden bg-shop_light_bg">
         {product?.image && (
-       <Link href={`product/${product?.slug?.current}`}>
+       <Link href={`product/${product?.slug}`}>
           <Image
-            src={urlFor(product.image[0]).url()}
-            alt={product.name || "Product Image"}
+            src={product.productImage[0]}
+            alt={product?.productName || "Product Image"}
             loading="lazy"
             width={300}
             height={300}

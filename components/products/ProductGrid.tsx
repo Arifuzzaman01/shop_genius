@@ -7,7 +7,8 @@ import NoProducts from "./NoProducts";
 import { productTypes } from "@/app/constants/data";
 import { useQuery } from "@tanstack/react-query";
 import ProductCard from "./ProductCard";
-import { Product } from "@/types/product";  // <-- Add Product type
+import { Product } from "@/app/constants/schema";
+
 
 const ProductGrid = () => {
   const [selectedTab, setSelectedTab] = useState(productTypes[0]?.title || "");
