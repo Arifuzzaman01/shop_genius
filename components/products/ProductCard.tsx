@@ -1,13 +1,13 @@
-import { Product } from "@/sanity.types";
-import { urlFor } from "@/sanity/lib/image";
 import { Flame, StarIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import AddToWishListButton from "./AddToWishListButton";
 import { SubTitle } from "../ui/text";
-import PriceView from "./price/PriceView";
+// import PriceView from "./price/PriceView";
 import AddToCartButton from "./addToCard/AddToCartButton";
+import PriceView from "./price/PriceView";
+// import AddToCartButton from "";
 
 const ProductCard = ({ product }: { product: Product }) => {
   // console.log(product?.category );
