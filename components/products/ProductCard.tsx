@@ -4,28 +4,26 @@ import Link from "next/link";
 import React from "react";
 import AddToWishListButton from "./AddToWishListButton";
 import { SubTitle } from "../ui/text";
-// import PriceView from "./price/PriceView";
 import AddToCartButton from "./addToCard/AddToCartButton";
 import PriceView from "./price/PriceView";
 import { Product } from "@/app/constants/schema";
-// import AddToCartButton from "";
+import productImage from "@/public/image/products/Product_4.jpg";
 
 const ProductCard = ({ product }: { product: Product }) => {
-  // console.log(product?.category );
   return (
-    <div className="text-sm border-[1px] border-dark_blue/20 rounded-md overflow-hidden bg-white group">
+    <div className="text-sm border border-dark_blue/20 rounded-md overflow-hidden bg-white group">
       <div className="relative group overflow-hidden bg-shop_light_bg">
-        {product?.image && (
-       <Link href={`product/${product?.slug}`}>
-          <Image
-            src={product.productImage[0]}
-            alt={product?.productName || "Product Image"}
-            loading="lazy"
-            width={300}
-            height={300}
-            className={`object-cover w-full h-full border rounded-t-md overflow-hidden transition-transform hoverEffect  bg-shop_light_bg ${product?.stock !== 0 ? "group-hover:scale-105" : "opacity-50"}`}
-          />
-       </Link>
+        {product?.productImage && product.productImage.length > 0 && (
+          <Link href={`product/${product?.slug}`}>
+            <Image
+              src={productImage|| "https://i.ibb.co.com/vvzT6Rfc/banner.jpg"}
+              alt={product?.productName || "Product Image"}
+              loading="lazy"
+              width={300}
+              height={300}
+              className={`object-cover w-full h-full border rounded-t-md overflow-hidden transition-transform hoverEffect  bg-shop_light_bg ${product?.stock !== 0 ? "group-hover:scale-105" : "opacity-50"}`}
+            />
+          </Link>
         )}
         <AddToWishListButton product={product} />
         {product?.status === "sales" && (
@@ -50,27 +48,27 @@ const ProductCard = ({ product }: { product: Product }) => {
             New!
           </p>
         )}
-        {product?.status === "outOfStock" && (
+        {product?.status === "out of stock" && (
           <p className="absolute top-2 left-2 z-10 border border-darkColor/75 px-2 rounded-full text-darkColor/750  group-hover:border-darkColor/55 group-hover:text-darkColor/55 text-xs hoverEffect bg-gray-100 ">
             Out of Stock
           </p>
         )}
       </div>
       <div className="p-3 flex flex-col gap-2">
-        {product?.categories && (
+        {product?.category && product.category.length > 0 && (
           <p className="uppercase line-clamp-1 text-shop-light_text text-xs">
-            {product.categories.map((cat) => cat?.title ).join(", ")}
+            {product.category.join(", ")}
           </p>
         )}
-        <SubTitle className=" text-[16px] line-clamp-1 font-bold">{product?.name}</SubTitle>
+        <SubTitle className=" text-[16px] line-clamp-1 font-bold">{product?.productName}</SubTitle>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1">
             {[...Array(5)].map((_, i) => (
               <StarIcon
                 size={12}
                 key={i}
-                className={`${i < 4 ? "text-shop_lighter_green" : "text-shop_lighter_text"}`}
-                fill={i < 4 ? "#93d991" : "#ababab"}
+                className={`${i < Math.floor(product?.rating || 4) ? "text-shop_lighter_green" : "text-shop_lighter_text"}`}
+                fill={i < Math.floor(product?.rating || 4) ? "#93d991" : "#ababab"}
               />
             ))}
           </div>
