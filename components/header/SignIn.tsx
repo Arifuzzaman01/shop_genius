@@ -1,36 +1,18 @@
 "use client";
+import React from 'react';
+import UserProfileDropdown from './UserProfileDropdown';
+import { signIn, useSession } from 'next-auth/react';
+import { redirect } from 'next/navigation';
 
-import React from "react";
-import { useSession, signIn, signOut } from "next-auth/react";
-import { Button } from "../ui/button";
-
-function SignIn() {
-  const { data: session } = useSession();
-
-  if (session) {
-    return (
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-semibold text-darkColor">
-          Hi, {session.user?.name || session.user?.email}
-        </span>
-        <Button 
-          onClick={() => signOut()} 
-          className="text-sm font-semibold hover:text-darkColor hoverEffect text-lightColor cursor-pointer bg-transparent border-0 p-0 h-auto"
-        >
-          Logout
-        </Button>
-      </div>
-    );
-  }
-
+const SignIn = () => {
+const {data: session} = useSession()
   return (
-    <Button 
-      onClick={() => signIn()} 
-      className="text-sm font-semibold hover:text-darkColor hoverEffect text-lightColor cursor-pointer bg-transparent border-0 p-0 h-auto"
-    >
-      Login
-    </Button>
+    <div>
+      {
+      session ? <UserProfileDropdown /> : <button onClick={() => redirect("/auth/signin") } className='px-2.5 py-1.5 bg-shop_light_green hover:bg-shop_btn_dark_green text-white rounded-sm'>Sign In</button>
+      }
+    </div>
   );
-}
+};
 
 export default SignIn;

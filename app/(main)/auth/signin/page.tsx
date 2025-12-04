@@ -1,106 +1,90 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function SignInPage() {
-  const router = useRouter();
-  const { data: session, status } = useSession();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+    const router = useRouter();
+    const { data: session, status } = useSession();
+    const [error, setError] = useState("");
 
-  // If the user is already signed in, redirect to the home page
-  if (status === "loading") {
-    return <div>Loading...</div>;
-  }
+    // If the user is already signed in, redirect to the home page
+    useEffect(() => {
+        if (status === "authenticated") {
+            router.push("/");
+        }
+    }, [status, router]);
 
-  if (session) {
-    router.push("/");
-    return null;
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        setError("Invalid email or password");
-      } else {
-        router.push("/");
-      }
-    } catch (err) {
-      setError("An error occurred during sign in");
-      console.error(err);
+    if (status === "loading") {
+        return <div className="flex items-center justify-center w-full h-screen text-2xl font-bold">Loading...</div>;
     }
-  };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
-          </h2>
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const form = e.target
+        const name = form.name.value;
+        const email = form.email.value;
+        const password = form.password.value;
+        const profile_url = form.profile_url.value;
+        console.log(name, email, password, profile_url);
+        try {
+            const result = await signIn("credentials", {
+                email,
+                password,
+                redirect: false,
+            });
+
+            if (result?.error) {
+                setError("Invalid email or password");
+            } else {
+                router.push("/");
+            }
+        } catch (err) {
+            setError("An error occurred during sign in");
+            console.error(err);
+        }
+    };
+
+    return (
+        <div className="min-h-[82vh] py-10  flex items-center justify-center bg-green-100">
+            <div className="max-w-[80%] w-full max-h-[600px] h-[550px] bg-white rounded-lg p-5 flex flex-col md:flex-row items-center justify-center gap-5">
+                <div className="flex-1">
+                    <form onSubmit={handleSubmit} className="m-8 space-y-6 ">
+                        {/* Full Name */}
+                        <div className="rounded-md shadow-sm space-y-5 ">
+                            <label className="text-sm font-medium m-2" >Your Full Name</label> <br />
+                            <input type="text" name="name" placeholder="Enter your full name" className="w-full p-2 border border-gray-300 rounded-md mt-2 hover:bg-gray-200/80 hoverEffect" required />
+                        </div>
+                        {/* Email */}
+                        <div className="rounded-md shadow-sm space-y-5 ">
+                            <label className="text-sm font-medium m-2" >Enter Your Email</label> <br />
+                            <input type="text" name="email" placeholder="Enter your email" className="w-full p-2 border border-gray-300 rounded-md mt-2 hover:bg-gray-200/80 hoverEffect" required />
+                        </div>
+                        {/* Password */}
+                        <div className="rounded-md shadow-sm space-y-5 ">
+                            <label className="text-sm font-medium m-2" >Enter a Valid Password</label> <br />
+                            <input type="text" name="password" placeholder="Enter your password" className="w-full p-2 border border-gray-300 rounded-md mt-2 hover:bg-gray-200/80 hoverEffect" required />
+                        </div>
+                        {/* Profile URL */}
+                        <div className="rounded-md shadow-sm space-y-5 ">
+                            <label className="text-sm font-medium m-2" >Enter a Valid Profile URL</label> <br />
+                            <input type="text" name="profile_url" placeholder="Enter your profile URL" className="w-full p-2 border border-gray-300 rounded-md mt-2 hover:bg-gray-200/80 hoverEffect" required />
+                        </div>
+                        {/* Submit Button */}
+                        <button type="submit" className="w-full bg-shop_btn_dark_green hover:bg-shop_light_green text-white font-bold py-2 px-4 rounded-md hoverEffect">SignUp</button>
+                    </form>
+                </div>
+                <div className="flex-1 h-full w-full hover:bg-shop_light_green rounded-l-full rounded-tr-full flex flex-col justify-center items-center text-white overflow-hidden  bg-shop_btn_dark_green hoverEffect group gap-2.5 border-4 border-shop_light_green text-center">
+                    <h2 className="text-2xl font-bold capitalize">Welcome to Back Our Shop</h2>
+                    <h1 className="text-3xl font-bold capitalize"> Please <span className="group-hover:text-shop_dark_green text-4xl text-shop_light_green hoverEffect text-shadow-2xs">Login</span> to Continue</h1>
+                    <p className="text-xl">and</p>
+                    <h2 className="text-xl font-bold capitalize"> Shop With Confidence </h2>
+                    <p>You have no account yet? Please <Link href="/auth/signup" className="text-green-500 underline hoverEffect group-hover:text-shop_dark_green" >SignUp</Link></p>
+                </div>
+            </div>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-              <span className="block sm:inline">{error}</span>
-            </div>
-          )}
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email-address" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email-address"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Button
-              type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Sign in
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
+    );
 }

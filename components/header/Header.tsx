@@ -1,4 +1,4 @@
-"use client";
+// "use client";
 
 import React from "react";
 import Container from "../Container";
@@ -8,6 +8,7 @@ import Searchbar from "./Searchbar";
 import CardIcon from "./CardIcon";
 import FavoriteButton from "./FavoriteButton";
 import Logo from "./Logo";
+// import UserProfileDropdown from "./UserProfileDropdown";
 import SignIn from "./SignIn";
 
 function Header() {
