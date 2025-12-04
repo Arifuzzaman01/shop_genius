@@ -5,12 +5,16 @@ import { useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
 
 interface CartItem {
+  _id?: string; // Add MongoDB _id for deletion
   productId: string;
   productName: string;
   productImage: string[];
   price: number;
   quantity: number;
   stock: number;
+  brand?: string;
+  category: string[];
+  discount?: number;
 }
 
 interface CartContextType {
@@ -18,6 +22,7 @@ interface CartContextType {
   cartCount: number;
   addToCart: (product: any) => Promise<void>;
   removeFromCart: (productId: string) => void;
+  removeItemPermanently: (itemId: string) => Promise<void>; // New function for permanent deletion
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
   isLoading: boolean;
@@ -43,19 +48,31 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loadCartFromBackend = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`http://localhost:5000/addToCart?email=${session?.user?.email}`);
+      const response = await fetch(`http://localhost:5000/addToCart?userEmail=${session?.user?.email}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
       if (response.ok) {
         const cartData = await response.json();
         // Transform the data to match our CartItem structure
         const transformedItems = cartData.map((item: any) => ({
-          productId: item.productId || item._id,
-          productName: item.productName || item.name,
-          productImage: item.productImage || [],
+          _id: item._id, // Store the MongoDB _id for deletion
+          productId: item.productId,
+          productName: item.productName,
+          productImage: item.productImage,
           price: item.price,
           quantity: item.quantity || 1,
-          stock: item.stock || 0
+          stock: item.stock || 0,
+          brand: item.brand,
+          category: item.category,
+          discount: item.discount
         }));
         setCartItems(transformedItems);
+      } else {
+        console.error("Failed to load cart:", response.status, response.statusText);
       }
     } catch (error) {
       console.error("Error loading cart:", error);
@@ -97,7 +114,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           productImage: product.productImage,
           price: product.price,
           quantity: 1,
-          stock: product.stock
+          stock: product.stock,
+          brand: product.brand,
+          category: product.category,
+          discount: product.discount
         };
         updatedCartItems = [...cartItems, newItem];
       }
@@ -106,26 +126,30 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Send to backend
       if (session?.user?.email) {
+        const cartItemData = {
+          buyerName: session.user.name || "Anonymous",
+          userEmail: session.user.email,
+          productId: product._id,
+          productName: product.productName,
+          brand: product.brand,
+          category: product.category,
+          discount: product.discount,
+          price: product.price,
+          productImage: product.productImage
+        };
+
         const response = await fetch("http://localhost:5000/addToCart", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            email: session.user.email,
-            productId: product._id,
-            productName: product.productName,
-            productImage: product.productImage,
-            price: product.price,
-            quantity: existingItemIndex >= 0 ? 
-              updatedCartItems[existingItemIndex].quantity : 1,
-            stock: product.stock
-          }),
+          body: JSON.stringify(cartItemData),
         });
         
         if (response.ok) {
           toast.success(`${product.productName} added to cart!`);
         } else {
+          console.error("Failed to add item to cart:", response.status, response.statusText);
           toast.error("Failed to add item to cart");
         }
       } else {
@@ -139,9 +163,40 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Soft remove from local state only
   const removeFromCart = (productId: string) => {
     const updatedCartItems = cartItems.filter(item => item.productId !== productId);
     setCartItems(updatedCartItems);
+  };
+
+  // Permanent removal from server
+  const removeItemPermanently = async (itemId: string) => {
+    try {
+      setIsLoading(true);
+      
+      // Call DELETE API endpoint
+      const response = await fetch(`http://localhost:5000/addToCart/${itemId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      
+      if (response.ok) {
+        // Remove from local state
+        const updatedCartItems = cartItems.filter(item => item._id !== itemId);
+        setCartItems(updatedCartItems);
+        toast.success("Item removed from cart!");
+      } else {
+        console.error("Failed to remove item:", response.status, response.statusText);
+        toast.error("Failed to remove item from cart");
+      }
+    } catch (error) {
+      console.error("Error removing item:", error);
+      toast.error("An error occurred while removing the item");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
@@ -167,6 +222,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         cartCount,
         addToCart,
         removeFromCart,
+        removeItemPermanently, // Export the new function
         updateQuantity,
         clearCart,
         isLoading

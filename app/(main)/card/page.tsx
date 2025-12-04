@@ -1,21 +1,21 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useCart } from "@/contexts/CartContext";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Minus, Plus, X, ShoppingCart } from "lucide-react";
 import Link from "next/link";
-
+import productImg from "@/public/image/products/product_14.jpg";
 const CartPage = () => {
-  const { cartItems, cartCount, removeFromCart, updateQuantity, isLoading } = useCart();
+  const { cartItems, cartCount, removeFromCart, removeItemPermanently, updateQuantity, isLoading } = useCart();
 
   const handleUpdateQuantity = (productId: string, quantity: number) => {
     updateQuantity(productId, quantity);
   };
 
-  const handleRemoveItem = (productId: string) => {
-    removeFromCart(productId);
+  const handleRemoveItem = (itemId: string) => {
+    removeItemPermanently(itemId);
   };
 
   const calculateTotal = () => {
@@ -53,13 +53,13 @@ const CartPage = () => {
         {/* Cart Items */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            {cartItems.map((item) => (
-              <div key={item.productId} className="flex items-center p-4 border-b border-gray-200 last:border-b-0">
+            {cartItems.map((item, index) => (
+              <div key={index} className="flex items-center p-4 border-b border-gray-200 last:border-b-0">
                 {/* Product Image */}
                 <div className="w-24 h-24 flex-shrink-0 mr-4">
                   {item.productImage && item.productImage.length > 0 ? (
                     <Image
-                      src={item.productImage[0] || "https://placehold.co/100"}
+                      src={productImg}
                       alt={item.productName}
                       width={100}
                       height={100}
@@ -73,7 +73,7 @@ const CartPage = () => {
                 {/* Product Info */}
                 <div className="flex-grow">
                   <h3 className="font-semibold text-lg">{item.productName}</h3>
-                  <p className="text-shop_light_green font-bold">${item.price.toFixed(2)}</p>
+                  <p className="text-shop_light_green font-bold">BDT {item.price.toFixed(2)}</p>
                   
                   {/* Quantity Controls */}
                   <div className="flex items-center mt-2">
@@ -82,7 +82,7 @@ const CartPage = () => {
                       size="sm"
                       onClick={() => handleUpdateQuantity(item.productId, item.quantity - 1)}
                       disabled={item.quantity <= 1}
-                      className="h-8 w-8 p-0"
+                      className="h-8 w-8 p-0 hover:bg-shop_orange hover:text-white"
                     >
                       <Minus className="h-4 w-4" />
                     </Button>
@@ -94,7 +94,7 @@ const CartPage = () => {
                       size="sm"
                       onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
                       disabled={item.quantity >= item.stock}
-                      className="h-8 w-8 p-0"
+                      className="h-8 w-8 p-0 hover:bg-shop_orange hover:text-white"
                     >
                       <Plus className="h-4 w-4" />
                     </Button>
@@ -107,12 +107,12 @@ const CartPage = () => {
                 
                 {/* Item Total & Remove */}
                 <div className="flex flex-col items-end">
-                  <p className="font-bold">${(item.price * item.quantity).toFixed(2)}</p>
+                  <p className="font-bold">BDT {(item.price * item.quantity).toFixed(2)}</p>
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    onClick={() => handleRemoveItem(item.productId)}
-                    className="mt-2 text-red-500 hover:text-red-700"
+                    onClick={() => handleRemoveItem(item._id || item.productId)} // Use _id for deletion if available
+                    className="mt-2 text-red-500 hover:text-red-700 hover:bg-shop_orange"
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -130,7 +130,7 @@ const CartPage = () => {
             <div className="space-y-2 mb-4">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span>${calculateTotal().toFixed(2)}</span>
+                <span>BDT {calculateTotal().toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Shipping</span>
@@ -138,12 +138,12 @@ const CartPage = () => {
               </div>
               <div className="flex justify-between">
                 <span>Tax</span>
-                <span>$0.00</span>
+                <span>BDT0.00</span>
               </div>
               <div className="border-t border-gray-200 pt-2 mt-2">
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total</span>
-                  <span>${calculateTotal().toFixed(2)}</span>
+                  <span>BDT {calculateTotal().toFixed(2)}</span>
                 </div>
               </div>
             </div>
