@@ -25,7 +25,7 @@ const HomeCategories = ({ categories }: { categories: Category[] }) => {
       <SubTitle className="text-xl font-bold text-center border-b pb-3">
         Popular Categories
       </SubTitle>
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-5">
         {categories?.map((category) => (
           <div key={category?.categoryId || category?.categoryName} className="group flex items-center gap-3 bg-shop_light_bg">
             {category?.image?.asset?.url ? (

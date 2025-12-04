@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
-
 import { AnimatePresence, motion } from "motion/react";
 import { Loader2 } from "lucide-react";
 import NoProducts from "../products/NoProducts";
@@ -24,7 +23,7 @@ const CategoryProducts = ({ categories, slug }: Props) => {
     queryKey: ["products"],
     queryFn: async () => {
       try {
-        // Always fetch all products to enable client-side filtering
+        
         const url = "http://localhost:5000/products";
         
         const res = await fetch(url);
@@ -39,23 +38,22 @@ const CategoryProducts = ({ categories, slug }: Props) => {
         throw err;
       }
     },
-    // Enable automatic fetching
+    
     enabled: true,
-    // Always refetch to bypass cache
+  
     staleTime: 0,
     gcTime: 0,
   });
 
-  // Filter products based on current category slug
+  
   const filteredProducts = allProducts?.filter((product) => {
-    // Check if the product's category array includes the current slug
-    // This handles both slug and categoryId matching
+
     return product.category.some(cat => 
       cat.toLowerCase() === currentSlug.toLowerCase()
     );
   }) || [];
 
-  // Effect to sync currentSlug with incoming slug prop when it changes
+  
   useEffect(() => {
     if (slug && slug !== currentSlug) {
       setCurrentSlug(slug);
@@ -63,20 +61,17 @@ const CategoryProducts = ({ categories, slug }: Props) => {
   }, [slug, currentSlug]);
 
   const handleCategoryChange = (categoryId: string, categorySlug?: string) => {
-    // Use slug if available, otherwise fall back to categoryId
+   
     const targetSlug = categorySlug || categoryId;
-    console.log("New slug:", targetSlug, "Current slug:", currentSlug);
-    
-    // Always update the state and URL, even if they're the same
+    // console.log("New slug:", targetSlug, "Current slug:", currentSlug);
+
     setCurrentSlug(targetSlug);
-    
-    // Update the URL without reloading the page
     router.push(`/category/${targetSlug}`, { scroll: false });
   };
 
   return (
-    <div className="p-5 flex items-start gap-5">
-      <div className="flex flex-col md:min-w-40 border">
+    <div className="p-5 md:flex items-start gap-5">
+      <div className="flex md:flex-col md:min-w-40 max-w-full overflow-x-auto border">
         {categories?.map((item) => (
           <Button
             onClick={() => handleCategoryChange(item?.categoryId, item?.slug)}
@@ -111,7 +106,7 @@ const CategoryProducts = ({ categories, slug }: Props) => {
             </div>
           </div>
         ) : filteredProducts && Array.isArray(filteredProducts) && filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
             {filteredProducts.map((product: Product) => (
               <AnimatePresence key={product._id}>
                 <motion.div>

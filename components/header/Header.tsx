@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Container from "../Container";
 import MobileMenu from "./MobileMenu";
@@ -6,9 +8,9 @@ import Searchbar from "./Searchbar";
 import CardIcon from "./CardIcon";
 import FavoriteButton from "./FavoriteButton";
 import Logo from "./Logo";
+import SignIn from "./SignIn";
 
-
-async function Header() {
+function Header() {
   
   return (
     <header className="bg-white/70 py-4 sticky top-0 z-50 backdrop-blur-md">
@@ -25,12 +27,7 @@ async function Header() {
           <Searchbar />
           <CardIcon />
           <FavoriteButton />
-          {/* <ClerkLoaded>
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-            {!user && <SignIn />}
-          </ClerkLoaded> */}
+          <SignIn />
         </div>
       </Container>
     </header>
