@@ -10,6 +10,7 @@ import { Product } from "@/app/constants/schema";
 import productImage from "@/public/image/products/Product_4.jpg";
 
 const ProductCard = ({ product }: { product: Product }) => {
+  console.log(product);
   return (
     <div className="text-sm border border-dark_blue/20 rounded-md overflow-hidden bg-white group">
       <div className="relative group overflow-hidden bg-shop_light_bg">
