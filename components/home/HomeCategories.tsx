@@ -2,24 +2,10 @@ import React from "react";
 import { SubTitle } from "../ui/text";
 import Image from "next/image";
 import Link from "next/link";
-
-// Define the Category interface
-interface Category {
-  categoryId: string;
-  categoryName: string;
-  slug?: {
-    current: string;
-  };
-  image?: {
-    asset?: {
-      url: string;
-    };
-  };
-  productCount?: number;
-}
+import { Category } from "@/app/constants/schema";
 
 const HomeCategories = ({ categories }: { categories: Category[] }) => {
-  console.log("categories",  categories);
+  // console.log("categories", categories);
   
   if (!categories || categories.length === 0) {
     return (
@@ -36,17 +22,17 @@ const HomeCategories = ({ categories }: { categories: Category[] }) => {
   
   return (
     <div className="bg-white border border-shop_light_green/20 my-10 md:my-20 p-5 md:p-7 rounded-md">
-      <SubTitle className="text-xl font-bold  border-b pb-3">
+      <SubTitle className="text-xl font-bold text-center border-b pb-3">
         Popular Categories
       </SubTitle>
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-5">
-        {categories?.map((category, index) => (
-          <div key={index} className="group flex items-center gap-3 bg-shop_light_bg">
+        {categories?.map((category) => (
+          <div key={category?.categoryId || category?.categoryName} className="group flex items-center gap-3 bg-shop_light_bg">
             {category?.image?.asset?.url ? (
               <div className="overflow-hidden border border-shop_orange/30 hover:border-shop_orange w-20 h-20 p-1">
-                <Link href={`/category/${category?.categoryId || '#'}`}>
+                <Link href={`/category/${category?.slug || category?.categoryId || '#'}`}>
                   <Image
-                    src="https://i.ibb.co/vvzT6Rfc/banner.jpg"
+                    src={category?.image?.asset?.url}
                     alt={category?.categoryName || "Category image"}
                     width={300}
                     height={300}
@@ -60,7 +46,7 @@ const HomeCategories = ({ categories }: { categories: Category[] }) => {
                 </Link>
               </div>
             ) : (
-              <Link href={`/category/${category?.categoryId || '#'}`} className="bg-gray-200 overflow-hidden border border-shop_orange/30 hover:border-shop_orange w-20 h-20 p-1 flex items-center justify-center">
+              <Link href={`/category/${category?.slug || category?.categoryId || '#'}`} className="bg-gray-200 overflow-hidden border border-shop_orange/30 hover:border-shop_orange w-20 h-20 p-1 flex items-center justify-center">
                 <span className="text-gray-500 text-xs text-center">No image</span>
               </Link>
             )}
@@ -68,7 +54,7 @@ const HomeCategories = ({ categories }: { categories: Category[] }) => {
               <h3 className="font-semibold text-base">{category?.categoryName}</h3>
               <p className="text-sm">
                 <span className="font-semibold">
-                  {category?.productCount !== undefined ? `(${category?.productCount})` : "(0)"}
+                  {category.productCount !== undefined ? `(${category.productCount})` : "(0)"}
                 </span> items available
               </p>
             </div>

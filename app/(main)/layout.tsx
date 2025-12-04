@@ -30,9 +30,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <header>
+        
           <Header />
-        </header>
+        
         <main>
           <QueryProvider>{children}</QueryProvider>
         </main>

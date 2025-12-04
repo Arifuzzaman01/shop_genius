@@ -17,3 +17,15 @@ export interface Product {
     createdAt?: Date;
     updatedAt?: Date;
 }
+
+export interface Category {
+    categoryId: string;
+    categoryName: string;
+    slug: string;
+    image?: {
+        asset: {
+            url: string;
+        };
+    }
+    productCount: number;
+}
