@@ -48,7 +48,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loadCartFromBackend = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`http://localhost:5000/addToCart?userEmail=${session?.user?.email}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/addToCart?userEmail=${session?.user?.email}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -138,7 +138,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           productImage: product.productImage
         };
 
-        const response = await fetch("http://localhost:5000/addToCart", {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/addToCart`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -175,7 +175,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       
       // Call DELETE API endpoint
-      const response = await fetch(`http://localhost:5000/addToCart/${itemId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/addToCart/${itemId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
