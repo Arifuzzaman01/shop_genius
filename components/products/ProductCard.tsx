@@ -17,7 +17,7 @@ const ProductCard = ({ product }: { product: Product }) => {
         {product?.productImage && product.productImage.length > 0 && (
           <Link href={`product/${product?.slug}`}>
             <Image
-              src={productImage|| "https://i.ibb.co.com/vvzT6Rfc/banner.jpg"}
+              src={product?.productImage[0] || "https://i.ibb.co.com/vvzT6Rfc/banner.jpg"}
               alt={product?.productName || "Product Image"}
               loading="lazy"
               width={300}

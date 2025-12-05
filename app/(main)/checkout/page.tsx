@@ -5,8 +5,9 @@ import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { Suspense } from 'react';
 
-export default function CheckoutPage() {
+function CheckoutContent() {
     const { cartItems, cartCount, clearCart } = useCart();
     const { data: session } = useSession();
     const router = useRouter();
@@ -334,5 +335,13 @@ export default function CheckoutPage() {
                 </div>
             </form>
         </div>
+    );
+}
+
+export default function CheckoutPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <CheckoutContent />
+        </Suspense>
     );
 }
