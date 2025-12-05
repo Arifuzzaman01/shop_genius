@@ -143,7 +143,7 @@ function CheckoutContent() {
             <h1 className="text-3xl font-bold mb-8">Checkout</h1>
 
             <form onSubmit={handleCheckout}>
-                <div className="">  // grid grid-cols-1 lg:grid-cols-3 gap-8
+                <div className="">  
                     {/* Order Summary */}
                     <div className="lg:col-span-2">
                         <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -298,9 +298,9 @@ function CheckoutContent() {
                     {/* Payment Section */}
                     <div className="lg:col-span-1">
                         <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
-                            <div className="flex gap-2 items-center">
-                                <h2 className="text-xl font-bold mb-4">Payment Details</h2>
-                                <p> <span>Total Quantity: {cartItems.reduce((total, item) => total + item.quantity, 0)}</span>, <span>Amount: {calculateTotal().toFixed(2)} BDT</span></p>
+                            <div className="flex gap-2 items-center mb-4">
+                                <h2 className="text-xl font-bold ">Payment Details : </h2>
+                                <p className='text-sm'> <span>Total Quantity: {cartItems.reduce((total, item) => total + item.quantity, 0)}</span>, <span>Amount: {calculateTotal().toFixed(2)} BDT</span>, <span>Address: street: {streetRef?.current?.value ? streetRef?.current?.value: " "}, city: {cityRef?.current?.value ? cityRef?.current?.value: " "}, state: {stateRef?.current?.value ? stateRef?.current?.value: " "},  country: {countryRef?.current?.value ? countryRef?.current?.value: " "}</span></p>
                             </div>
 
                             {error && (

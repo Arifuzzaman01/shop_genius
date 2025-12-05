@@ -5,6 +5,8 @@ import { Product } from "@/app/constants/schema";
 import { ShoppingBag } from "lucide-react";
 import React from "react";
 import { useCart } from "@/contexts/CartContext";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface Props {
   product: Product;
@@ -13,9 +15,18 @@ interface Props {
 
 const AddToCartButton = ({ product, className }: Props) => {
   const { addToCart, isLoading } = useCart();
+  const { data: session } = useSession();
+  const router = useRouter();
   const outOfStock = product.stock === 0;
   
   const handleAddToCart = async () => {
+    // Check if user is authenticated
+    if (!session) {
+      // Redirect to login page with callback URL to current page
+      router.push(`/auth/signin?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+    
     await addToCart(product);
   }
   

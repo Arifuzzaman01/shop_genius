@@ -6,9 +6,21 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Minus, Plus, X, ShoppingCart } from "lucide-react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import productImg from "@/public/image/products/product_14.jpg";
+
 const CartPage = () => {
   const { cartItems, cartCount, removeFromCart, removeItemPermanently, updateQuantity, isLoading } = useCart();
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  // Redirect to login if user is not authenticated
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/auth/signin?callbackUrl=/card");
+    }
+  }, [status, router]);
 
   const handleUpdateQuantity = (productId: string, quantity: number) => {
     updateQuantity(productId, quantity);
@@ -22,12 +34,18 @@ const CartPage = () => {
     return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
-  if (isLoading) {
+  // Show loading state while checking authentication
+  if (status === "loading" || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-shop_light_green"></div>
       </div>
     );
+  }
+
+  // If user is not authenticated, don't render the cart content
+  if (!session) {
+    return null;
   }
 
   if (cartItems.length === 0) {
@@ -59,7 +77,7 @@ const CartPage = () => {
                 <div className="w-24 h-24 shrink-0 mr-4">
                   {item.productImage && item.productImage.length > 0 ? (
                     <Image
-                      src={productImg}
+                      src={item.productImage[0] || productImg}
                       alt={item.productName}
                       width={100}
                       height={100}

@@ -8,7 +8,6 @@ export default withAuth({
 
 export const config = { 
   matcher: [
-    "/profile/:path*",
-    // Add other protected routes here
+    // Add protected routes here
   ]
 };

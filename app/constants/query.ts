@@ -4,7 +4,7 @@ import { Category, Product } from "./schema";
 // Define a proper async function to fetch categories data
 export async function fetchCategories() {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
     const res = await fetch(`${baseUrl}/products/by-category`);
 
     if (!res.ok) {
@@ -36,7 +36,7 @@ export function useCategoryById(id: string) {
     queryKey: ["category", id],
     queryFn: async () => {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
         const res = await fetch(`${baseUrl}/api/products/by-category/${id}`);
 
         if (!res.ok) {
