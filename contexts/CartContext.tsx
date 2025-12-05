@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
 
-interface CartItem {
+export interface CartItem {
   _id?: string; // Add MongoDB _id for deletion
   productId: string;
   productName: string;
@@ -16,7 +16,6 @@ interface CartItem {
   category: string[];
   discount?: number;
 }
-
 interface CartContextType {
   cartItems: CartItem[];
   cartCount: number;

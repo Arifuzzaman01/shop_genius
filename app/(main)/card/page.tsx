@@ -56,7 +56,7 @@ const CartPage = () => {
             {cartItems.map((item, index) => (
               <div key={index} className="flex items-center p-4 border-b border-gray-200 last:border-b-0">
                 {/* Product Image */}
-                <div className="w-24 h-24 flex-shrink-0 mr-4">
+                <div className="w-24 h-24 shrink-0 mr-4">
                   {item.productImage && item.productImage.length > 0 ? (
                     <Image
                       src={productImg}
@@ -71,7 +71,7 @@ const CartPage = () => {
                 </div>
                 
                 {/* Product Info */}
-                <div className="flex-grow">
+                <div className="grow">
                   <h3 className="font-semibold text-lg">{item.productName}</h3>
                   <p className="text-shop_light_green font-bold">BDT {item.price.toFixed(2)}</p>
                   
@@ -148,10 +148,11 @@ const CartPage = () => {
               </div>
             </div>
             
-            <Button className="w-full bg-shop_dark_green hover:bg-shop_btn_dark_green py-6 text-lg">
-              Proceed to Checkout
-            </Button>
-            
+            <Link href="/checkout">
+              <Button className="w-full bg-shop_dark_green hover:bg-shop_btn_dark_green py-6 text-lg">
+                Proceed to Checkout
+              </Button>
+            </Link>            
             <Link href="/" className="block mt-4 text-center text-shop_dark_green hover:underline">
               Continue Shopping
             </Link>
