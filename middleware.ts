@@ -8,6 +8,8 @@ export default withAuth({
 
 export const config = { 
   matcher: [
-    // Add protected routes here
+    // Protect these specific routes
+    "/card",
+    "/checkout/:path*",
   ]
 };
