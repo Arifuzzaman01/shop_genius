@@ -41,8 +41,7 @@ const MainPage = () => {
       <div className="py-10">
         <ProductGrid />
         <HomeCategories categories={categories || []} />
-        {/* <ShopByBrand />
-        <LatestBlog /> */}
+       
       </div>
     </Container>
   )
