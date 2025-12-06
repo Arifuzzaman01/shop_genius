@@ -24,7 +24,7 @@ const CategoryProducts = ({ categories, slug }: Props) => {
     queryFn: async () => {
       try {
         
-        const url = "http://localhost:5000/products";
+        const url = process.env.NEXT_PUBLIC_API_URL + "/products";
         
         const res = await fetch(url);
 
@@ -70,7 +70,7 @@ const CategoryProducts = ({ categories, slug }: Props) => {
   };
 
   return (
-    <div className="p-5 md:flex items-start gap-5">
+    <div className="p-2.5 md:p-5 md:flex items-start gap-5">
       <div className="flex md:flex-col md:min-w-40 max-w-full overflow-x-auto border">
         {categories?.map((item) => (
           <Button
