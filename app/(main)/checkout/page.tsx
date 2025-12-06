@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Suspense } from 'react';
+import toast from 'react-hot-toast';
 
 function CheckoutContent() {
     const { cartItems, cartCount, clearCart } = useCart();
@@ -115,7 +116,8 @@ function CheckoutContent() {
                 throw new Error(result.message || 'Failed to process payment');
             }
 
-            // On successful payment creation, redirect to success page
+           
+            toast.success('Order placed successfully!');
             clearCart();
             router.push(`/checkout/success?session_id=${result.orderId || paymentData.orderId}`);
         } catch (err) {

@@ -48,7 +48,7 @@ const ProductGrid = () => {
     return (
       <div>
         <HomeTabBar selectedTab={selectedTab} onTabSelect={setSelectedTab} />
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 mt-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 mt-10">
           {[...Array(10)].map((_, index) => (
             <div key={index} className="border rounded-md overflow-hidden bg-white animate-pulse">
               <div className="bg-gray-200 h-48 w-full"></div>
@@ -84,7 +84,7 @@ const ProductGrid = () => {
       ) : (
         <div>
           {products && products.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 mt-10">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 mt-10">
               {products.map((p) => (
                 <ProductCard key={p._id} product={p} />
               ))}

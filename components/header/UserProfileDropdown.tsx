@@ -2,13 +2,13 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "../ui/button";
-import { 
-  Tooltip, 
-  TooltipContent, 
-  TooltipProvider, 
-  TooltipTrigger 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
 } from "@/components/ui/tooltip";
-import { LogOut, User, Mail, Phone, MapPin, Calendar } from "lucide-react";
+import { LogOut, User, Mail, Phone, MapPin, Calendar, LogOutIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const UserProfileDropdown = () => {
@@ -28,13 +28,7 @@ const UserProfileDropdown = () => {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users?email=${email}`, { method: 'GET' });
       const data = await response.json();
       setUserData(data);
-    //   if (response.ok) {
-    //     const users = await response.json();
-    //     // Assuming the API returns an array and we want the first user
-    //     if (users && users.length > 0) {
-    //       setUserData(users[0]);
-    //     }
-    //   }
+
     } catch (error) {
       console.error("Error fetching user data:", error);
     } finally {
@@ -45,7 +39,7 @@ const UserProfileDropdown = () => {
   if (!session) {
     return null;
   }
-console.log(userData);
+  console.log(userData);
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/" });
   };
@@ -54,12 +48,13 @@ console.log(userData);
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <button className="focus:outline-none">
+          <div>
+            <button className="focus:outline-none">
             {session.user?.image || (userData?.profile_url) ? (
-              <img 
-                src={userData?.profile_url ||session.user?.image  } 
-                alt={userData?.name || session.user?.name || "User"} 
-                className="w-10 h-10 rounded-full object-cover border-2 border-shop_light_green"
+              <img
+                src={userData?.profile_url || session.user?.image}
+                alt={userData?.name || session.user?.name || "User"}
+                className="w-10 h-10 rounded-full object-cover border-2 border-shop_light_green hidden md:block"
               />
             ) : (
               <div className="w-10 h-10 rounded-full bg-shop_light_green flex items-center justify-center text-white">
@@ -67,8 +62,11 @@ console.log(userData);
               </div>
             )}
           </button>
+          <button className=" py-1 text-sm text-shop_btn_dark_green bg-grey-200 rounded-md md:hidden"><LogOutIcon size={20} /></button>
+          </div>
+
         </TooltipTrigger>
-        <TooltipContent 
+        <TooltipContent
           className="bg-white border border-gray-200 rounded-lg shadow-lg p-0 w-80"
           sideOffset={10}
         >
@@ -81,9 +79,9 @@ console.log(userData);
               <>
                 <div className="flex items-center gap-3 mb-4">
                   {session.user?.image || (userData?.profile_url) ? (
-                    <img 
-                      src={session.user?.image || userData?.profile_url} 
-                      alt={session.user?.name || userData?.name || "User"} 
+                    <img
+                      src={session.user?.image || userData?.profile_url}
+                      alt={session.user?.name || userData?.name || "User"}
                       className="w-16 h-16 rounded-full object-cover"
                     />
                   ) : (
@@ -109,14 +107,14 @@ console.log(userData);
                       <span>{userData.phone}</span>
                     </div>
                   )}
-                  
+
                   {userData?.address && (
                     <div className="flex items-start gap-2 text-sm">
                       <MapPin size={16} className="text-gray-500 mt-0.5" />
                       <span>{userData.address}</span>
                     </div>
                   )}
-                  
+
                   {userData?.created_at && (
                     <div className="flex items-center gap-2 text-sm">
                       <Calendar size={16} className="text-gray-500" />

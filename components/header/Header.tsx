@@ -24,7 +24,7 @@ function Header() {
         {/* NavLink */}
         <HeaderMenu />
         {/* NavButton */}
-        <div className="w-auto md:w-1/3 flex justify-end items-center gap-5">
+        <div className="w-auto md:w-1/3 flex justify-end items-center gap-3 md:gap-5">
           <Searchbar />
           <CardIcon />
           <FavoriteButton />

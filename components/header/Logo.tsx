@@ -14,7 +14,7 @@ function Logo({
     <Link href={"/"} className="inline-flex">
       <h2
         className={cn(
-          "text-2xl text-shop_dark_green font-black  hover:text-shop_light_green uppercase hoverEffect group",
+          "text-xl md:text-2xl text-shop_dark_green font-black  hover:text-shop_light_green uppercase hoverEffect group",
           className
         )}
       >
@@ -35,7 +35,7 @@ function Logo({
         >
           G
         </span>
-        enius
+        <span className="hidden sm:inline">enius</span>
       </h2>
     </Link>
   );
