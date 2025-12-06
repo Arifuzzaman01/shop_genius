@@ -7,7 +7,7 @@ import { SubTitle } from "../ui/text";
 import AddToCartButton from "./addToCard/AddToCartButton";
 import PriceView from "./price/PriceView";
 import { Product } from "@/app/constants/schema";
-import productImage from "@/public/image/products/Product_4.jpg";
+
 
 const ProductCard = ({ product }: { product: Product }) => {
   // console.log(product);
