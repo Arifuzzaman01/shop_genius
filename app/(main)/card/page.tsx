@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useCart } from "@/contexts/CartContext";
+import { useCart } from "@/app/hooks/useCartRedux";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Minus, Plus, X, ShoppingCart } from "lucide-react";
@@ -14,7 +14,6 @@ const CartPage = () => {
   const { cartItems, cartCount, removeFromCart, removeItemPermanently, updateQuantity, isLoading } = useCart();
   const { data: session, status } = useSession();
   const router = useRouter();
-
   // Redirect to login if user is not authenticated
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -66,7 +65,7 @@ const CartPage = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Your Shopping Cart ({cartCount} items)</h1>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cart Items */}
         <div className="lg:col-span-2">
@@ -87,12 +86,12 @@ const CartPage = () => {
                     <div className="bg-gray-200 border-2 border-dashed rounded-xl w-full h-full" />
                   )}
                 </div>
-                
+
                 {/* Product Info */}
                 <div className="grow">
                   <h3 className="font-semibold text-lg">{item.productName}</h3>
                   <p className="text-shop_light_green font-bold">BDT {item.price.toFixed(2)}</p>
-                  
+
                   {/* Quantity Controls */}
                   <div className="flex items-center mt-2">
                     <Button
@@ -104,9 +103,9 @@ const CartPage = () => {
                     >
                       <Minus className="h-4 w-4" />
                     </Button>
-                    
+
                     <span className="mx-2 w-8 text-center">{item.quantity}</span>
-                    
+
                     <Button
                       variant="outline"
                       size="sm"
@@ -116,13 +115,13 @@ const CartPage = () => {
                     >
                       <Plus className="h-4 w-4" />
                     </Button>
-                    
+
                     <span className="ml-2 text-sm text-gray-500">
                       {item.stock > 0 ? `${item.stock} in stock` : "Out of stock"}
                     </span>
                   </div>
                 </div>
-                
+
                 {/* Item Total & Remove */}
                 <div className="flex flex-col items-end">
                   <p className="font-bold">BDT {(item.price * item.quantity).toFixed(2)}</p>
@@ -139,12 +138,12 @@ const CartPage = () => {
             ))}
           </div>
         </div>
-        
+
         {/* Order Summary */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
             <h2 className="text-xl font-bold mb-4">Order Summary</h2>
-            
+
             <div className="space-y-2 mb-4">
               <div className="flex justify-between">
                 <span>Subtotal</span>
@@ -165,12 +164,12 @@ const CartPage = () => {
                 </div>
               </div>
             </div>
-            
+
             <Link href="/checkout">
               <Button className="w-full bg-shop_dark_green hover:bg-shop_btn_dark_green py-6 text-lg">
                 Proceed to Checkout
               </Button>
-            </Link>            
+            </Link>
             <Link href="/" className="block mt-4 text-center text-shop_dark_green hover:underline">
               Continue Shopping
             </Link>

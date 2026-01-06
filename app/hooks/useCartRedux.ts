@@ -1,11 +1,22 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { 
+  addToCart, 
+  removeFromCart, 
+  removeItemPermanently, 
+  updateQuantity, 
+  clearCart, 
+  setLoading,
+  setCartItems 
+} from "../redux/cart/cartSlice";
+import { RootState } from "../redux/store";
 import { useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
+import { useEffect } from "react";
 
 export interface CartItem {
-  _id?: string; // Add MongoDB _id for deletion
+  _id?: string;
   productId: string;
   productName: string;
   productImage: string[];
@@ -16,37 +27,43 @@ export interface CartItem {
   category: string[];
   discount?: number;
 }
-interface CartContextType {
-  cartItems: CartItem[];
-  cartCount: number;
-  addToCart: (product: any) => Promise<void>;
-  removeFromCart: (productId: string) => void;
-  removeItemPermanently: (itemId: string) => Promise<void>; // New function for permanent deletion
-  updateQuantity: (productId: string, quantity: number) => void;
-  clearCart: () => void;
-  isLoading: boolean;
+
+interface BackendCartItem {
+  _id?: string;
+  productId: string;
+  productName: string;
+  productImage: string[];
+  price: number;
+  quantity: number;
+  stock: number;
+  brand?: string;
+  category: string[];
+  discount?: number;
 }
 
-const CartContext = createContext<CartContextType | undefined>(undefined);
+interface Product {
+  _id: string;
+  productName: string;
+  productImage: string[];
+  price: number;
+  stock: number;
+  brand?: string;
+  category: string[];
+  discount?: number;
+}
 
-export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+export const useCart = () => {
+  const dispatch = useDispatch();
   const { data: session } = useSession();
+  const { cartItems, isLoading } = useSelector((state: RootState) => state.cart);
 
   // Calculate total cart count
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   // Load cart from backend when user logs in
-  useEffect(() => {
-    if (session?.user?.email) {
-      loadCartFromBackend();
-    }
-  }, [session]);
-
   const loadCartFromBackend = async () => {
     try {
-      setIsLoading(true);
+      dispatch(setLoading(true));
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/addToCart?userEmail=${session?.user?.email}`, {
         method: 'GET',
         headers: {
@@ -55,9 +72,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       if (response.ok) {
-        const cartData = await response.json();
+        const cartData: BackendCartItem[] = await response.json();
         // Transform the data to match our CartItem structure
-        const transformedItems = cartData.map((item: any) => ({
+        const transformedItems = cartData.map((item: BackendCartItem) => ({
           _id: item._id, // Store the MongoDB _id for deletion
           productId: item.productId,
           productName: item.productName,
@@ -69,33 +86,38 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           category: item.category,
           discount: item.discount
         }));
-        setCartItems(transformedItems);
+        dispatch(setCartItems(transformedItems));
       } else {
         console.error("Failed to load cart:", response.status, response.statusText);
       }
     } catch (error) {
       console.error("Error loading cart:", error);
     } finally {
-      setIsLoading(false);
+      dispatch(setLoading(false));
     }
   };
 
-  const addToCart = async (product: any) => {
+  // Load cart when session changes
+  useEffect(() => {
+    if (session?.user?.email) {
+      loadCartFromBackend();
+    }
+  }, [session?.user?.email]); // Only run when email changes
+
+  const handleAddToCart = async (product: Product) => {
     try {
-      setIsLoading(true);
+      dispatch(setLoading(true));
       
       // Check if product already exists in cart
-      const existingItemIndex = cartItems.findIndex(item => item.productId === product._id);
+      const existingItem = cartItems.find(item => item.productId === product._id);
       
-      let updatedCartItems;
-      if (existingItemIndex >= 0) {
+      if (existingItem) {
         // Update quantity if product exists
-        updatedCartItems = [...cartItems];
-        const newQuantity = updatedCartItems[existingItemIndex].quantity + 1;
+        const newQuantity = existingItem.quantity + 1;
         
         // Check stock availability
         if (newQuantity <= product.stock) {
-          updatedCartItems[existingItemIndex].quantity = newQuantity;
+          dispatch(updateQuantity({ productId: product._id, quantity: newQuantity }));
         } else {
           toast.error("Not enough stock available!");
           return;
@@ -118,10 +140,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           category: product.category,
           discount: product.discount
         };
-        updatedCartItems = [...cartItems, newItem];
+        
+        dispatch(addToCart(newItem));
       }
-      
-      setCartItems(updatedCartItems);
       
       // Send to backend
       if (session?.user?.email) {
@@ -159,20 +180,19 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error("Error adding to cart:", error);
       toast.error("An error occurred while adding to cart");
     } finally {
-      setIsLoading(false);
+      dispatch(setLoading(false));
     }
   };
 
   // Soft remove from local state only
-  const removeFromCart = (productId: string) => {
-    const updatedCartItems = cartItems.filter(item => item.productId !== productId);
-    setCartItems(updatedCartItems);
+  const handleRemoveFromCart = (productId: string) => {
+    dispatch(removeFromCart(productId));
   };
 
   // Permanent removal from server
-  const removeItemPermanently = async (itemId: string) => {
+  const handleRemoveItemPermanently = async (itemId: string) => {
     try {
-      setIsLoading(true);
+      dispatch(setLoading(true));
       
       // Call DELETE API endpoint
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/addToCart/${itemId}`, {
@@ -183,9 +203,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       if (response.ok) {
-        // Remove from local state
-        const updatedCartItems = cartItems.filter(item => item._id !== itemId);
-        setCartItems(updatedCartItems);
+        // Remove from Redux state
+        dispatch(removeItemPermanently(itemId));
         toast.success("Item removed from cart!");
       } else {
         console.error("Failed to remove item:", response.status, response.statusText);
@@ -195,48 +214,31 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error("Error removing item:", error);
       toast.error("An error occurred while removing the item");
     } finally {
-      setIsLoading(false);
+      dispatch(setLoading(false));
     }
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const handleUpdateQuantity = (productId: string, quantity: number) => {
     if (quantity <= 0) {
-      removeFromCart(productId);
+      handleRemoveFromCart(productId);
       return;
     }
     
-    const updatedCartItems = cartItems.map(item => 
-      item.productId === productId ? { ...item, quantity } : item
-    );
-    setCartItems(updatedCartItems);
+    dispatch(updateQuantity({ productId, quantity }));
   };
 
-  const clearCart = () => {
-    setCartItems([]);
+  const handleClearCart = () => {
+    dispatch(clearCart());
   };
 
-  return (
-    <CartContext.Provider
-      value={{
-        cartItems,
-        cartCount,
-        addToCart,
-        removeFromCart,
-        removeItemPermanently, // Export the new function
-        updateQuantity,
-        clearCart,
-        isLoading
-      }}
-    >
-      {children}
-    </CartContext.Provider>
-  );
-};
-
-export const useCart = () => {
-  const context = useContext(CartContext);
-  if (context === undefined) {
-    throw new Error("useCart must be used within a CartProvider");
-  }
-  return context;
+  return {
+    cartItems,
+    cartCount,
+    addToCart: handleAddToCart,
+    removeFromCart: handleRemoveFromCart,
+    removeItemPermanently: handleRemoveItemPermanently,
+    updateQuantity: handleUpdateQuantity,
+    clearCart: handleClearCart,
+    isLoading,
+  };
 };

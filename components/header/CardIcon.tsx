@@ -3,11 +3,11 @@
 import { ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-import { useCart } from "@/contexts/CartContext";
+import { useCart } from "@/app/hooks/useCartRedux";
 
 function CardIcon() {
   const { cartCount } = useCart();
-  
+
   return (
     <Link href={"/card"} className="relative group">
       <ShoppingBag className="w-5 h-5 hover:text-shop_light_green hoverEffect" />

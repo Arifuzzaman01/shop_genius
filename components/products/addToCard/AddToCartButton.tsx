@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Product } from "@/app/constants/schema";
 import { ShoppingBag } from "lucide-react";
 import React from "react";
-import { useCart } from "@/contexts/CartContext";
+import { useCart } from "@/app/hooks/useCartRedux";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -13,7 +13,7 @@ interface Props {
   className?: string;
 }
 
-const AddToCartButton = ({ product, className }: Props) => {
+const AddToCartButton = ({ product }: Props) => {
   const { addToCart, isLoading } = useCart();
   const { data: session } = useSession();
   const router = useRouter();

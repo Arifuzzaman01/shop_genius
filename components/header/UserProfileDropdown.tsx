@@ -39,7 +39,7 @@ const UserProfileDropdown = () => {
   if (!session) {
     return null;
   }
-  console.log(userData);
+  // console.log(userData);
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/" });
   };
@@ -52,7 +52,7 @@ const UserProfileDropdown = () => {
             <button className="focus:outline-none">
             {session.user?.image || (userData?.profile_url) ? (
               <img
-                src={userData?.profile_url || session.user?.image}
+                src={userData?.profileURL || session.user?.image}
                 alt={userData?.name || session.user?.name || "User"}
                 className="w-10 h-10 rounded-full object-cover border-2 border-shop_light_green hidden md:block"
               />

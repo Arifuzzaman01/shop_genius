@@ -70,7 +70,7 @@ function Footer() {
         </div>
         <div className="py-6 border-t border-darkColor/60 text-center text-sm text-gray-600">
           <div className="text-center text-darkColor/60 font-wider hover:text-shop_dark_green hoverEffect group uppercase">© {new Date().getFullYear()} {""}
-            <Logo className="text-sm"/>  All rights reserved.</div>
+            <Logo className="text-[14px] "/>  All rights reserved.</div>
         </div>
       </Container>
     </footer>

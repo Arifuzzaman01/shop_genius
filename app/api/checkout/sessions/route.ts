@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { CartItem } from '@/contexts/CartContext';
+import { CartItem } from '@/app/redux/cart/cartSlice';
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,7 +15,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { cartItems, shippingAddress }: { cartItems: CartItem[], shippingAddress: any } = await req.json();
+    interface ShippingAddress {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+      country: string;
+    }
+    
+    const { cartItems, shippingAddress }: { cartItems: CartItem[], shippingAddress: ShippingAddress } = await req.json();
 
     // Validate cart items
     if (!cartItems || cartItems.length === 0) {
