@@ -4,6 +4,7 @@ export const HeaderData =[
     {title: "Blog", href: "/blog"},
     {title: "Contact", href: "/contact"},
     {title: "Hot Deal", href: "/hot-deal"},
+    {title: "Dashboard", href: "/dashboard"},
 ]
 export const QuickLinkData =[
     {title: "About us", href: "about-us"},

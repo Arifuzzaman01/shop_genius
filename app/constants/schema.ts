@@ -29,3 +29,52 @@ export interface Category {
     }
     productCount: number;
 }
+
+// Management-specific interfaces
+export interface CreateCategoryInput {
+    categoryName: string;
+    description?: string;
+    status?: "active" | "inactive";
+}
+
+export interface UpdateCategoryInput extends Partial<CreateCategoryInput> {
+    categoryId: string;
+}
+
+export interface CreateProductInput {
+    productName: string;
+    description?: string;
+    price: number;
+    stock: number;
+    minStockThreshold?: number;
+    category: string[]; // Array of category IDs
+    brand?: string;
+    productImage?: string[];
+    status?: "active" | "out_of_stock";
+    discount?: number;
+    featured?: boolean;
+}
+
+export interface UpdateProductInput extends Partial<CreateProductInput> {
+    _id: string;
+}
+
+export interface ProductFormData {
+    productName: string;
+    description: string;
+    price: string;
+    stock: string;
+    minStockThreshold: string;
+    category: string[];
+    brand: string;
+    productImage: string;
+    status: "active" | "out_of_stock";
+    discount: string;
+    featured: boolean;
+}
+
+export interface CategoryFormData {
+    categoryName: string;
+    description: string;
+    status: "active" | "inactive";
+}
