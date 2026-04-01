@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
 import { Loader2, Plus, Edit, Trash2, AlertCircle, Package, DollarSign, Hash } from "lucide-react";
 import { Product, Category, ProductFormData } from "@/app/constants/schema";
-import { fetchProducts } from "@/lib/product-api";
+import { fetchProducts, createProduct, updateProduct, deleteProduct } from "@/lib/product-api";
 import { fetchCategories } from "@/lib/category-api";
 import { validateProductForm } from "@/lib/product-category-validation";
+import { addToRestockQueue, createActivityLog } from "@/lib/stock-management";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { formatCurrency } from "@/lib/utils";
 
@@ -135,14 +136,48 @@ export default function ProductManagementPage() {
     }
 
     try {
-      // TODO: Implement API call when backend is ready
-      // For now, just show success message
-      if (editingProduct) {
-        toast.success("Product updated successfully! (Backend not connected)");
-      } else {
-        toast.success("Product created successfully! (Backend not connected)");
+      const stock = parseInt(formData.stock, 10);
+      const minStockThreshold = parseInt(formData.minStockThreshold || "0", 10);
+      const payload = {
+        productName: formData.productName.trim(),
+        description: formData.description.trim() || undefined,
+        price: parseFloat(formData.price),
+        stock,
+        minStockThreshold,
+        category: formData.category,
+        brand: formData.brand.trim() || undefined,
+        productImage: formData.productImage ? [formData.productImage] : undefined,
+        status: stock === 0 ? "out_of_stock" as const : formData.status,
+        discount: formData.discount ? parseFloat(formData.discount) : undefined,
+        featured: formData.featured
+      };
+
+      const savedProduct = editingProduct
+        ? await updateProduct({ _id: editingProduct._id, ...payload })
+        : await createProduct(payload);
+
+      if (stock <= minStockThreshold) {
+        try {
+          await addToRestockQueue(savedProduct._id);
+        } catch {
+          // Non-blocking; queue endpoint may be unavailable in some environments.
+        }
       }
-      
+
+      try {
+        await createActivityLog({
+          type: editingProduct ? "product_updated" : "product_added",
+          title: editingProduct ? "Product updated" : "Product added",
+          description: `${payload.productName} ${editingProduct ? "updated" : "created"} by user`,
+          relatedEntityId: savedProduct._id,
+          relatedEntityType: "product",
+          metadata: { stock, minStockThreshold }
+        });
+      } catch {
+        // Activity log failures should not block CRUD success.
+      }
+
+      toast.success(editingProduct ? "Product updated successfully!" : "Product created successfully!");
       handleCloseForm();
       loadData();
     } catch (error) {
@@ -159,8 +194,8 @@ export default function ProductManagementPage() {
     }
 
     try {
-      // TODO: Implement API call when backend is ready
-      toast.success("Product deleted successfully! (Backend not connected)");
+      await deleteProduct(productId);
+      toast.success("Product deleted successfully!");
       loadData();
     } catch (error) {
       console.error("Error deleting product:", error);
@@ -176,6 +211,8 @@ export default function ProductManagementPage() {
         : [...prev.category, categoryId]
     }));
   };
+
+  const getCategoryId = (category: Category) => category.categoryId || category._id || "";
 
   if (status === "loading") {
     return (
@@ -466,18 +503,22 @@ export default function ProductManagementPage() {
                       <p className="text-sm text-gray-500">No categories available. Please create categories first.</p>
                     ) : (
                       <div className="space-y-2">
-                        {categories.map((category) => (
-                          <label key={category.categoryId} className="flex items-center gap-2 cursor-pointer">
+                        {categories.map((category) => {
+                          const categoryId = getCategoryId(category);
+                          if (!categoryId) return null;
+                          return (
+                          <label key={categoryId} className="flex items-center gap-2 cursor-pointer">
                             <input
                               type="checkbox"
-                              checked={formData.category.includes(category.categoryId)}
-                              onChange={() => handleCategoryToggle(category.categoryId)}
+                              checked={formData.category.includes(categoryId)}
+                              onChange={() => handleCategoryToggle(categoryId)}
                               className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
                               disabled={isSubmitting}
                             />
                             <span className="text-sm text-gray-700">{category.categoryName}</span>
                           </label>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
                   </div>

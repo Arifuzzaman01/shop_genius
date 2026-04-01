@@ -1,4 +1,4 @@
-"react-brand"
+"use client"
 import * as React from "react"
 import {
   LayoutDashboard,
@@ -8,6 +8,7 @@ import {
   Package,
   BarChart3,
   Store,
+  Layers,
 } from "lucide-react"
 
 import {
@@ -21,6 +22,7 @@ import {
   SidebarGroup,
   SidebarGroupLabel,
 } from "@/components/ui/sidebar"
+import Link from "next/link"
 
 const navItems = [
   {
@@ -37,6 +39,11 @@ const navItems = [
     title: "Products",
     url: "/dashboard/products",
     icon: Package,
+  },
+  {
+    title: "Categories",
+    url: "/dashboard/categories",
+    icon: Layers,
   },
   {
     title: "Customers",
@@ -59,14 +66,14 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b px-6 py-4">
-        <div className="flex items-center gap-2 font-semibold">
+        <Link href="/" className="flex items-center gap-2 font-semibold">
           <div className="flex h-8 w-8 items-center justify-center rounded bg-primary text-primary-foreground">
             <Store className="h-5 w-5" />
           </div>
           <span className="truncate group-data-[collapsible=icon]:hidden">
             ShopGenius
           </span>
-        </div>
+        </Link>
       </SidebarHeader>
 
       <SidebarContent>

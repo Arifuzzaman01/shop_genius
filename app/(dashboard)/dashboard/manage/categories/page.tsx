@@ -97,9 +97,13 @@ export default function CategoryManagementPage() {
 
     try {
       if (editingCategory) {
+        const categoryId = editingCategory.categoryId || editingCategory._id;
+        if (!categoryId) {
+          throw new Error("Category identifier is missing");
+        }
         // Update existing category
         await updateCategory({
-          categoryId: editingCategory.categoryId,
+          categoryId,
           categoryName: formData.categoryName,
           description: formData.description || undefined,
           status: formData.status
@@ -194,9 +198,12 @@ export default function CategoryManagementPage() {
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {categories.map((category) => (
+                {categories.map((category) => {
+                  const categoryId = category.categoryId || category._id || "";
+                  if (!categoryId) return null;
+                  return (
                   <div 
-                    key={category.categoryId}
+                    key={categoryId}
                     className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
                   >
                     <div className="flex justify-between items-start mb-4">
@@ -222,7 +229,7 @@ export default function CategoryManagementPage() {
                         Edit
                       </Button>
                       <Button
-                        onClick={() => handleDelete(category.categoryId, category.categoryName)}
+                        onClick={() => handleDelete(categoryId, category.categoryName)}
                         className="flex-1 bg-red-600 hover:bg-red-700 text-white text-sm"
                       >
                         <Trash2 className="w-4 h-4 mr-1" />
@@ -230,7 +237,8 @@ export default function CategoryManagementPage() {
                       </Button>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

@@ -12,7 +12,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex min-h-screen w-full">
           <AppSidebar />
           <main className="flex-1 overflow-y-auto bg-muted/20">
-            <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background px-6">
+            <header className="fixed w-full  top-0 z-10 flex h-16 items-center justify-between border-b bg-background px-6">
               <div className="flex-1">
                 <SidebarTrigger />
               </div>
@@ -23,7 +23,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                  <UserNav />
                </div>
             </header>
-            <div className="p-6 md:p-8">
+            <div className="p-6 md:p-8 mt-12">
               {children}
             </div>
           </main>

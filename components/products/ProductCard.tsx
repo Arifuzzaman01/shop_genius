@@ -10,14 +10,14 @@ import { Product } from "@/app/constants/schema";
 
 
 const ProductCard = ({ product }: { product: Product }) => {
-  // console.log(product);
+  console.log(product);
   return (
     <div className="text-sm border border-dark_blue/20 rounded-md overflow-hidden bg-white group">
       <div className="relative group overflow-hidden bg-shop_light_bg">
         {product?.productImage && product.productImage.length > 0 && (
           <Link href={`product/${product?.slug}`}>
             <Image
-              src={product?.productImage[0] || "https://i.ibb.co.com/vvzT6Rfc/banner.jpg"}
+              src={product?.productImage[0] }
               alt={product?.productName || "Product Image"}
               loading="lazy"
               width={300}

@@ -1,12 +1,12 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { 
   Package, 
   Layers, 
   ShoppingCart, 
-  Heart, 
   Settings, 
   TrendingUp, 
   DollarSign, 
@@ -15,52 +15,18 @@ import {
   Plus,
   BarChart3
 } from "lucide-react";
-
-// Dashboard statistics data
-const statsData = [
-  {
-    title: "Total Products",
-    value: "0",
-    change: "+0%",
-    icon: Package,
-    color: "text-green-600",
-    bgColor: "bg-green-100",
-    gradient: "from-green-500 to-green-600"
-  },
-  {
-    title: "Categories",
-    value: "0",
-    change: "+0%",
-    icon: Layers,
-    color: "text-blue-600",
-    bgColor: "bg-blue-100",
-    gradient: "from-blue-500 to-blue-600"
-  },
-  {
-    title: "Total Orders",
-    value: "0",
-    change: "+0%",
-    icon: ShoppingCart,
-    color: "text-purple-600",
-    bgColor: "bg-purple-100",
-    gradient: "from-purple-500 to-purple-600"
-  },
-  {
-    title: "Revenue",
-    value: "$0.00",
-    change: "+0%",
-    icon: DollarSign,
-    color: "text-emerald-600",
-    bgColor: "bg-emerald-100",
-    gradient: "from-emerald-500 to-emerald-600"
-  }
-];
+import { fetchProducts } from "@/lib/product-api";
+import { fetchCategories } from "@/lib/category-api";
+import { fetchOrders } from "@/lib/order-api";
+import { fetchActivityLogs } from "@/lib/stock-management";
+import { formatCurrency } from "@/lib/utils";
+import { ActivityLog, Category, Order, Product } from "@/app/constants/schema";
 
 // Quick actions
 const quickActions = [
   {
     title: "Add Product",
-    href: "/manage/products",
+    href: "/dashboard/manage/products",
     icon: Plus,
     color: "bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700",
     description: "Create new product",
@@ -68,7 +34,7 @@ const quickActions = [
   },
   {
     title: "Add Category",
-    href: "/manage/categories",
+    href: "/dashboard/manage/categories",
     icon: Layers,
     color: "bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700",
     description: "Create new category",
@@ -92,44 +58,69 @@ const quickActions = [
   }
 ];
 
-// Recent activity (placeholder)
-const recentActivity = [
-  {
-    title: "Welcome!",
-    description: "Get started by adding your first product or category",
-    time: "Just now",
-    icon: TrendingUp,
-    color: "text-green-600"
-  }
-];
-
 export default function DashboardPage() {
   const { data: session } = useSession();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [activity, setActivity] = useState<ActivityLog[]>([]);
+
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        const [productsData, categoriesData, ordersData, activityData] = await Promise.all([
+          fetchProducts(),
+          fetchCategories(),
+          fetchOrders(),
+          fetchActivityLogs(10),
+        ]);
+        setProducts(productsData);
+        setCategories(categoriesData);
+        setOrders(ordersData);
+        setActivity(activityData);
+      } catch (error) {
+        console.error("Failed to load dashboard data", error);
+      }
+    };
+    loadDashboardData();
+  }, []);
+
+  const metrics = useMemo(() => {
+    const now = new Date();
+    const start = new Date(now);
+    start.setHours(0, 0, 0, 0);
+
+    const ordersToday = orders.filter((o) => new Date(o.createdAt) >= start);
+    const pendingToday = ordersToday.filter((o) => o.status === "pending").length;
+    const completedToday = ordersToday.filter((o) => ["delivered", "cancelled"].includes(o.status)).length;
+    const revenueToday = ordersToday
+      .filter((o) => o.status !== "cancelled")
+      .reduce((sum, o) => sum + (o.total || 0), 0);
+    const lowStockItems = products.filter((p) => p.stock <= ((p as Product & { minStockThreshold?: number }).minStockThreshold ?? 5));
+    const activeProducts = products.filter((p) => p.stock > 0 && p.status !== "out of stock").length;
+    const outOfStock = products.filter((p) => p.stock === 0 || p.status === "out of stock" || p.status === "out_of_stock").length;
+
+    return {
+      ordersToday: ordersToday.length,
+      pendingToday,
+      completedToday,
+      revenueToday,
+      lowStockCount: lowStockItems.length,
+      activeProducts,
+      outOfStock
+    };
+  }, [orders, products]);
 
   return (
     <div className="space-y-8">
-      {/* Welcome Section */}
-      {/* <div className="bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 rounded-2xl p-8 text-white shadow-xl">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">
-              Welcome back, {session?.user?.name || 'User'}! 👋
-            </h1>
-            <p className="text-green-50 text-lg">
-              Here&apos;s what&apos;s happening with your store today.
-            </p>
-          </div>
-          <div className="hidden lg:block">
-            <div className="w-32 h-32 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-              <Package className="w-16 h-16 text-white" />
-            </div>
-          </div>
-        </div>
-      </div> */}xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
       {/* Statistics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        {statsData.map((stat, index) => {
+        {[
+          { title: "Total Orders Today", value: `${metrics.ordersToday}`, icon: ShoppingCart, color: "text-purple-600", bgColor: "bg-purple-100" },
+          { title: "Pending vs Completed", value: `${metrics.pendingToday} / ${metrics.completedToday}`, icon: TrendingUp, color: "text-blue-600", bgColor: "bg-blue-100" },
+          { title: "Low Stock Items", value: `${metrics.lowStockCount}`, icon: AlertTriangle, color: "text-orange-600", bgColor: "bg-orange-100" },
+          { title: "Revenue Today", value: formatCurrency(metrics.revenueToday), icon: DollarSign, color: "text-emerald-600", bgColor: "bg-emerald-100" }
+        ].map((stat, index) => {
           const Icon = stat.icon;
           return (
             <div 
@@ -142,7 +133,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex items-center gap-1 text-sm">
                   <TrendingUp className="w-4 h-4 text-green-600" />
-                  <span className="text-green-600 font-semibold">{stat.change}</span>
+                  <span className="text-green-600 font-semibold">Live</span>
                 </div>
               </div>
               <div>
@@ -204,7 +195,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <Link 
-              href="/manage/products"
+              href="/dashboard/manage/products"
               className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
             >
               Manage
@@ -218,21 +209,21 @@ export default function DashboardPage() {
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <span className="text-sm text-gray-600">Active Products</span>
               </div>
-              <span className="font-semibold text-gray-800">0</span>
+              <span className="font-semibold text-gray-800">{metrics.activeProducts}</span>
             </div>
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
                 <span className="text-sm text-gray-600">Low Stock</span>
               </div>
-              <span className="font-semibold text-gray-800">0</span>
+              <span className="font-semibold text-gray-800">{metrics.lowStockCount}</span>
             </div>
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                 <span className="text-sm text-gray-600">Out of Stock</span>
               </div>
-              <span className="font-semibold text-gray-800">0</span>
+              <span className="font-semibold text-gray-800">{metrics.outOfStock}</span>
             </div>
           </div>
         </div>
@@ -250,7 +241,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <Link 
-              href="/manage/categories"
+              href="/dashboard/manage/categories"
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
             >
               Manage
@@ -264,14 +255,14 @@ export default function DashboardPage() {
                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                 <span className="text-sm text-gray-600">Total Categories</span>
               </div>
-              <span className="font-semibold text-gray-800">0</span>
+              <span className="font-semibold text-gray-800">{categories.length}</span>
             </div>
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <span className="text-sm text-gray-600">Active</span>
               </div>
-              <span className="font-semibold text-gray-800">0</span>
+              <span className="font-semibold text-gray-800">{categories.length}</span>
             </div>
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <div className="flex items-center gap-3">
@@ -294,26 +285,25 @@ export default function DashboardPage() {
         </div>
         
         <div className="space-y-4">
-          {recentActivity.map((activity, index) => {
-            const Icon = activity.icon;
+          {activity.slice(0, 10).map((activity, index) => {
             return (
               <div 
                 key={index}
                 className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <div className="bg-white p-2 rounded-lg shadow-sm">
-                  <Icon className={`w-5 h-5 ${activity.color}`} />
+                  <TrendingUp className="w-5 h-5 text-green-600" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-semibold text-gray-800 mb-1">{activity.title}</h4>
-                  <p className="text-sm text-gray-600">{activity.description}</p>
+                  <h4 className="font-semibold text-gray-800 mb-1">{activity.title || "Activity"}</h4>
+                  <p className="text-sm text-gray-600">{activity.description || "No description"}</p>
                 </div>
-                <span className="text-xs text-gray-500 whitespace-nowrap">{activity.time}</span>
+                <span className="text-xs text-gray-500 whitespace-nowrap">{new Date(activity.createdAt).toLocaleTimeString()}</span>
               </div>
             );
           })}
           
-          {recentActivity.length === 0 && (
+          {activity.length === 0 && (
             <div className="text-center py-12">
               <BarChart3 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-500">No recent activity</p>
