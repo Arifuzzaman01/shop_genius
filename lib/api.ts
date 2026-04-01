@@ -181,8 +181,8 @@ export interface Order {
   customerName: string;
   customerEmail: string;
   orderItems: OrderItem[];
-  total: number;
-  status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
+  totalAmount: number;
+  orderStatus: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
   shippingAddress: ShippingAddress;
   paymentMethod?: string;
   isPaid: boolean;
@@ -301,10 +301,10 @@ export async function updateOrderStatus(
   id: string, 
   status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled'
 ): Promise<Order> {
-  const res = await fetch(`${API_URL}/orders/${id}`, {
-    method: 'PUT',
+  const res = await fetch(`${API_URL}/orders/${id}/status`, {
+    method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ orderStatus: status }),
   });
   if (!res.ok) throw new Error('Failed to update order status');
   return res.json();

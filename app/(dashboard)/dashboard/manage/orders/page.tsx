@@ -23,6 +23,7 @@ export default function OrderManagementPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -94,7 +95,7 @@ export default function OrderManagementPage() {
           quantity: item.quantity,
           price: item.price
         })),
-        status: order.status,
+        status: order.orderStatus,
         shippingAddress: {
           street: order.shippingAddress?.street || "",
           city: order.shippingAddress?.city || "",
@@ -281,40 +282,50 @@ export default function OrderManagementPage() {
     if (!confirm("Are you sure you want to cancel this order?")) return;
 
     try {
+      setUpdatingOrderId(orderId);
       await cancelOrder(orderId);
       toast.success("Order cancelled successfully!");
       loadData();
     } catch (error: unknown) {
       console.error("Error cancelling order:", error);
       toast.error(error instanceof Error ? error.message : "Failed to cancel order");
+    } finally {
+      setUpdatingOrderId(null);
     }
   };
 
   const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
     try {
-      await updateOrderStatus(orderId, newStatus);
+      setUpdatingOrderId(orderId);
+      if (newStatus === "cancelled") {
+        await cancelOrder(orderId);
+      } else {
+        await updateOrderStatus(orderId, newStatus);
+      }
       toast.success(`Order status updated to ${newStatus}!`);
       loadData();
     } catch (error: unknown) {
       console.error("Error updating status:", error);
       toast.error(error instanceof Error ? error.message : "Failed to update order status");
+    } finally {
+      setUpdatingOrderId(null);
     }
   };
 
   // Filter orders by status
   const filteredOrders = statusFilter === "all" 
     ? orders 
-    : orders.filter(order => order.status === statusFilter);
+    : orders.filter(order => order.orderStatus === statusFilter);
 
   // Calculate statistics
   const stats = {
     total: orders.length,
-    pending: orders.filter(o => o.status === "pending").length,
-    confirmed: orders.filter(o => o.status === "confirmed").length,
-    shipped: orders.filter(o => o.status === "shipped").length,
-    delivered: orders.filter(o => o.status === "delivered").length,
-    cancelled: orders.filter(o => o.status === "cancelled").length,
-    revenue: orders.filter(o => o.status !== "cancelled").reduce((sum, o) => sum + o.total, 0)
+    pending: orders.filter(o => o.orderStatus === "pending").length,
+    confirmed: orders.filter(o => o.orderStatus === "confirmed").length,
+    shipped: orders.filter(o => o.orderStatus === "shipped").length,
+    delivered: orders.filter(o => o.orderStatus === "delivered").length,
+    cancelled: orders.filter(o => o.orderStatus === "cancelled").length,
+    revenue: orders.filter(o => o.orderStatus !== "cancelled").reduce((sum, o) => sum + o.totalAmount, 0)
   };
 
   const getStatusColor = (orderStatus: string) => {
@@ -335,7 +346,7 @@ export default function OrderManagementPage() {
       </div>
     );
   }
-
+console.log(orders);
   return (
     <ProtectedRoute>
       <Container>
@@ -471,8 +482,8 @@ export default function OrderManagementPage() {
               </Button>
             </div>
           ) : (
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
+            <div className="bg-white rounded-lg shadow overflow-x-auto">
+              <table className="min-w-full divide-y overflow-x-auto divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -509,19 +520,19 @@ export default function OrderManagementPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{order.customerName}</div>
-                        <div className="text-xs text-gray-500">{order.customerEmail}</div>
+                        <div className="text-xs text-gray-500">{order.customerEmail}x\</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">{order.orderItems.length} items</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-bold text-gray-900">
-                          {formatCurrency(order.total)}
+                          {formatCurrency(order.totalAmount)}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.status)}`}>
-                          {order.status}
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.orderStatus)}`}>
+                          {order.orderStatus}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -536,10 +547,11 @@ export default function OrderManagementPage() {
                           >
                             <Edit className="w-4 h-4" />
                           </button>
-                          {order.status !== 'cancelled' && order.status !== 'delivered' && (
+                          {order.orderStatus !== 'cancelled' && order.orderStatus !== 'delivered' && (
                             <select
-                              value={order.status}
+                              value={order.orderStatus}
                               onChange={(e) => handleUpdateStatus(order._id, e.target.value as OrderStatus)}
+                              disabled={updatingOrderId === order._id}
                               className="border border-gray-300 rounded px-2 py-1 text-xs"
                             >
                               <option value="pending">Pending</option>
@@ -548,6 +560,16 @@ export default function OrderManagementPage() {
                               <option value="delivered">Delivered</option>
                               <option value="cancelled">Cancel</option>
                             </select>
+                          )}
+                          {order.orderStatus !== "cancelled" && order.orderStatus !== "delivered" && (
+                            <button
+                              onClick={() => handleCancelOrder(order._id)}
+                              className="text-red-600 hover:text-red-800 text-xs border border-red-200 rounded px-2 py-1"
+                              disabled={updatingOrderId === order._id}
+                              title="Cancel order"
+                            >
+                              Cancel
+                            </button>
                           )}
                         </div>
                       </td>

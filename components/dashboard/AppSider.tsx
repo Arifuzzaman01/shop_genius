@@ -32,7 +32,7 @@ const navItems = [
   },
   {
     title: "Orders",
-    url: "/dashboard/orders",
+    url: "/dashboard/manage/orders",
     icon: ShoppingBag,
   },
   {
@@ -42,7 +42,7 @@ const navItems = [
   },
   {
     title: "Categories",
-    url: "/dashboard/categories",
+    url: "/dashboard/manage/categories",
     icon: Layers,
   },
   {
