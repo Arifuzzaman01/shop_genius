@@ -72,15 +72,20 @@ const CategoryProducts = ({ categories, slug }: Props) => {
   return (
     <div className="p-2.5 md:p-5 md:flex items-start gap-5">
       <div className="flex md:flex-col md:min-w-40 max-w-full overflow-x-auto border">
-        {categories?.map((item) => (
-          <Button
-            onClick={() => handleCategoryChange(item?.categoryId, item?.slug)}
-            key={item.categoryId}
-            className={`bg-transparent border-0 p-0 rounded-none text-darkColor shadow-none hover:text-white font-semibold hoverEffect border-b last:border-b-0 capitalize transition-colors ${item?.slug == currentSlug || item?.categoryId == currentSlug ? "bg-shop_orange border-shop_orange text-white" : ""}`}
-          >
-            <p className="w-full text-left px-2">{item.categoryName}</p>
-          </Button>
-        ))}
+        {categories?.map((item) => {
+          const categoryId = item.categoryId || item._id;
+          if (!categoryId) return null;
+
+          return (
+            <Button
+              onClick={() => handleCategoryChange(categoryId, item.slug)}
+              key={categoryId}
+              className={`bg-transparent border-0 p-0 rounded-none text-darkColor shadow-none hover:text-white font-semibold hoverEffect border-b last:border-b-0 capitalize transition-colors ${item.slug == currentSlug || categoryId == currentSlug ? "bg-shop_orange border-shop_orange text-white" : ""}`}
+            >
+              <p className="w-full text-left px-2">{item.categoryName}</p>
+            </Button>
+          );
+        })}
       </div>
       <div className="flex-1">
         {isLoading ? (

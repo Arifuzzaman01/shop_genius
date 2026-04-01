@@ -90,7 +90,10 @@ export default function DashboardPage() {
     const start = new Date(now);
     start.setHours(0, 0, 0, 0);
 
-    const ordersToday = orders.filter((o) => new Date(o.createdAt) >= start);
+    const ordersToday = orders.filter((o) => {
+      if (!o.createdAt) return false;
+      return new Date(o.createdAt) >= start;
+    });
     const pendingToday = ordersToday.filter((o) => o.status === "pending").length;
     const completedToday = ordersToday.filter((o) => ["delivered", "cancelled"].includes(o.status)).length;
     const revenueToday = ordersToday
@@ -98,7 +101,7 @@ export default function DashboardPage() {
       .reduce((sum, o) => sum + (o.total || 0), 0);
     const lowStockItems = products.filter((p) => p.stock <= ((p as Product & { minStockThreshold?: number }).minStockThreshold ?? 5));
     const activeProducts = products.filter((p) => p.stock > 0 && p.status !== "out of stock").length;
-    const outOfStock = products.filter((p) => p.stock === 0 || p.status === "out of stock" || p.status === "out_of_stock").length;
+    const outOfStock = products.filter((p) => p.stock === 0 || p.status === "out of stock").length;
 
     return {
       ordersToday: ordersToday.length,

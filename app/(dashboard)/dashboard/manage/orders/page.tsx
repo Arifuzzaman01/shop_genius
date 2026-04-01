@@ -103,7 +103,7 @@ export default function OrderManagementPage() {
           zipCode: order.shippingAddress?.zipCode || "",
           country: order.shippingAddress?.country || ""
         },
-        notes: order.notes || ""
+        notes: ""
       });
     } else {
       setEditingOrder(null);

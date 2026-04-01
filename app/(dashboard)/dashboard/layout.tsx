@@ -5,7 +5,15 @@ import { AppSidebar } from "@/components/dashboard/AppSider"
 import { UserNav } from "@/components/dashboard/user-nav"
 import AuthSessionProvider from "@/app/providers/sessionProvider"
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+import { redirect,  } from "next/navigation";
+import { getServerSession } from "next-auth";
+
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const session = await getServerSession(); // however you fetch session
+
+  if (!session) {
+    redirect("/auth/signin");
+  }
   return (
     <AuthSessionProvider>
       <SidebarProvider>

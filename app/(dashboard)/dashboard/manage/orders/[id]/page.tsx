@@ -24,6 +24,8 @@ export default function OrderDetailsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
 
+  const getDisplayDate = (date?: string | Date) => (date ? formatDate(date) : "N/A");
+
   useEffect(() => {
     if (orderId) {
       loadOrder();
@@ -99,7 +101,7 @@ export default function OrderDetailsPage() {
             <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p className="text-xl font-semibold text-gray-600">Order not found</p>
             <Button
-              onClick={() => router.push("/manage/orders")}
+              onClick={() => router.push("/dashboard/manage/orders")}
               className="mt-4"
             >
               Back to Orders
@@ -109,6 +111,12 @@ export default function OrderDetailsPage() {
       </ProtectedRoute>
     );
   }
+
+  const orderItems = order.orderItems ?? order.items ?? [];
+  const computedSubtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const displaySubtotal = order.subtotal ?? computedSubtotal;
+  const displayTax = order.tax ?? 0;
+  const displayShipping = order.shippingCost ?? 0;
 
   return (
     <ProtectedRoute>
@@ -132,7 +140,7 @@ export default function OrderDetailsPage() {
                 <div className="flex items-center gap-4 text-gray-600">
                   <span className="flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    {formatDate(order.createdAt)}
+                    {getDisplayDate(order.createdAt)}
                   </span>
                   <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full border ${getStatusColor(order.status)}`}>
                     {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
@@ -161,7 +169,7 @@ export default function OrderDetailsPage() {
                     </Button>
                     <Button
                       onClick={() => handleUpdateStatus("delivered")}
-                      disabled={isUpdating || order.status === "delivered"}
+                      disabled={isUpdating}
                       variant="outline"
                       className="text-sm"
                     >
@@ -191,7 +199,7 @@ export default function OrderDetailsPage() {
                 </h2>
                 
                 <div className="space-y-4">
-                  {order.items.map((item, index) => (
+                  {orderItems.map((item, index) => (
                     <div key={index} className="flex items-center gap-4 border-b pb-4 last:border-b-0">
                       {item.productImage && (
                         <img
@@ -223,19 +231,19 @@ export default function OrderDetailsPage() {
                 <div className="mt-6 pt-6 border-t space-y-2">
                   <div className="flex justify-between text-gray-600">
                     <span>Subtotal:</span>
-                    <span className="font-medium">{formatCurrency(order.subtotal)}</span>
+                    <span className="font-medium">{formatCurrency(displaySubtotal)}</span>
                   </div>
-                  {order.tax && (
+                  {displayTax > 0 && (
                     <div className="flex justify-between text-gray-600">
                       <span>Tax:</span>
-                      <span className="font-medium">{formatCurrency(order.tax)}</span>
+                      <span className="font-medium">{formatCurrency(displayTax)}</span>
                     </div>
                   )}
-                  {order.shippingCost && (
+                  {displayShipping >= 0 && (
                     <div className="flex justify-between text-gray-600">
                       <span>Shipping:</span>
                       <span className="font-medium">
-                        {order.shippingCost === 0 ? "Free" : formatCurrency(order.shippingCost)}
+                        {displayShipping === 0 ? "Free" : formatCurrency(displayShipping)}
                       </span>
                     </div>
                   )}
@@ -312,7 +320,7 @@ export default function OrderDetailsPage() {
                     <div className="w-2 h-2 rounded-full bg-blue-500 mt-2"></div>
                     <div>
                       <p className="font-medium text-sm">Order Created</p>
-                      <p className="text-xs text-gray-600">{formatDate(order.createdAt)}</p>
+                      <p className="text-xs text-gray-600">{getDisplayDate(order.createdAt)}</p>
                     </div>
                   </div>
                   
@@ -321,7 +329,7 @@ export default function OrderDetailsPage() {
                       <div className="w-2 h-2 rounded-full bg-green-500 mt-2"></div>
                       <div>
                         <p className="font-medium text-sm">Order Confirmed</p>
-                        <p className="text-xs text-gray-600">{formatDate(order.updatedAt)}</p>
+                        <p className="text-xs text-gray-600">{getDisplayDate(order.updatedAt)}</p>
                       </div>
                     </div>
                   )}
@@ -331,7 +339,7 @@ export default function OrderDetailsPage() {
                       <div className="w-2 h-2 rounded-full bg-purple-500 mt-2"></div>
                       <div>
                         <p className="font-medium text-sm">Order Shipped</p>
-                        <p className="text-xs text-gray-600">{formatDate(order.updatedAt)}</p>
+                        <p className="text-xs text-gray-600">{getDisplayDate(order.updatedAt)}</p>
                       </div>
                     </div>
                   )}
@@ -341,7 +349,7 @@ export default function OrderDetailsPage() {
                       <div className="w-2 h-2 rounded-full bg-emerald-500 mt-2"></div>
                       <div>
                         <p className="font-medium text-sm">Order Delivered</p>
-                        <p className="text-xs text-gray-600">{formatDate(order.updatedAt)}</p>
+                        <p className="text-xs text-gray-600">{getDisplayDate(order.updatedAt)}</p>
                       </div>
                     </div>
                   )}
@@ -351,7 +359,7 @@ export default function OrderDetailsPage() {
                       <div className="w-2 h-2 rounded-full bg-red-500 mt-2"></div>
                       <div>
                         <p className="font-medium text-sm">Order Cancelled</p>
-                        <p className="text-xs text-gray-600">{formatDate(order.updatedAt)}</p>
+                        <p className="text-xs text-gray-600">{getDisplayDate(order.updatedAt)}</p>
                       </div>
                     </div>
                   )}
